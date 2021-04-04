@@ -1,11 +1,10 @@
 /.netbean/
 /.idea/
-/vendor/
-composer.phar
-composer.lock
+/src/vendor/
+/src/composer.phar
+/src/composer.lock
 *.log
 *.dat
 *.db3
 *.db
-src
 thumb

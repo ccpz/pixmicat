@@ -25,9 +25,11 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log \
 COPY src/ /app/ 
 COPY conf/supervisord.conf /etc/supervisor/conf.d/
 COPY conf/nginx.conf /etc/nginx/
+COPY conf/start.sh /
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+RUN chmod 700 /start.sh
 WORKDIR /app
 RUN composer install --no-dev
 EXPOSE 80
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+CMD ["/start.sh"]

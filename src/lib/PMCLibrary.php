@@ -103,7 +103,7 @@ class PMCLibrary
             $instFileIO = new $fileIoExactClass(
                 \unserialize(\FILEIO_PARAMETER),
                 array( // FileIO 環境常數
-                    'IFS.LOG' => \STORAGE_PATH . \FILEIO_INDEXLOG,
+                    'IFS.LOG' => \FILEIO_INDEXLOG,
                     'IMG' => \IMG_DIR,
                     'THUMB' => \THUMB_DIR
                 )

@@ -23,7 +23,7 @@ http://pixmicat.openfoundry.org/
 // 伺服器常態設定
 if(!defined('DEBUG')) define("DEBUG", false); // 是否產生詳細 DEBUG 訊息
 define("ROOTPATH", dirname(__FILE__).DIRECTORY_SEPARATOR); // 主程式根目錄
-define("STORAGE_PATH", ROOTPATH); // 圖檔、快取儲存目錄 (需具有讀寫權限 777)
+define("STORAGE_PATH", "/storage"); // 圖檔、快取儲存目錄 (需具有讀寫權限 777)
 define("TIME_ZONE", '+8'); // 時區設定 (GMT時區，參照 http://wwp.greenwichmeantime.com/ )
 define("PIXMICAT_LANGUAGE", 'zh_TW'); // 語系語定
 define("HTTP_UPLOAD_DIFF", 50); // HTTP上傳所有位元組與實際位元組之允許誤差值
@@ -31,7 +31,7 @@ ini_set("memory_limit", '128M'); // PHP運行的最大記憶體使用量 (php內
 
 // FileIO設定
 define("FILEIO_BACKEND", 'normal'); // FileIO後端指定 (local, normal, ftp)
-define("FILEIO_INDEXLOG", 'fileioindex.dat'); // FileIO索引記錄檔 (儲存在本機端)
+define("FILEIO_INDEXLOG", STORAGE_PATH.'/fileioindex.dat'); // FileIO索引記錄檔 (儲存在本機端)
 define("FILEIO_PARAMETER", ''); // FileIO參數 (本機端儲存)
 //define("FILEIO_PARAMETER", serialize(array('ftp.example.com', 21, 'demo', 'demo', 'PASV', '/pwd/', 'http://www.example.com/~demo/pwd/', true))); // FileIO參數 (FTP)
 //define("FILEIO_PARAMETER", serialize(array('00000000000000000000000000000000'))); // FileIO參數 (ImageShack)
