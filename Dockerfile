@@ -11,7 +11,7 @@ RUN apt-get update && \
     apt-get install -y software-properties-common && \
     add-apt-repository ppa:ondrej/php && \
     apt-get update && apt-get install -y \
-    php5.6-fpm php5.6-cli php5.6-imagick php5.6-gd php5.6-mysql imagemagick nginx supervisor\
+    php5.6-fpm php5.6-cli php5.6-imagick php5.6-gd php5.6-mysql php5.6-curl php5.6-dom imagemagick nginx supervisor curl\
     && apt-get autoremove -y && apt-get clean \
     && rm -rf /var/lib/apt/lists/* 
 
@@ -25,5 +25,9 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log \
 COPY src/ /app/ 
 COPY conf/supervisord.conf /etc/supervisor/conf.d/
 COPY conf/nginx.conf /etc/nginx/
+
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+WORKDIR /app
+RUN composer install --no-dev
 EXPOSE 80
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
