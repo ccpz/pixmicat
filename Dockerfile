@@ -19,7 +19,11 @@ RUN mkdir -p /var/log/supervisor && \
     mkdir -p /run/php
 
 RUN mkdir /app
+RUN ln -sf /dev/stdout /var/log/nginx/access.log \
+    && ln -sf /dev/stderr /var/log/nginx/error.log \
+    && ln -sf /dev/stderr /var/log/php5.6-fpm.log
 COPY src/ /app/ 
 COPY conf/supervisord.conf /etc/supervisor/conf.d/
+COPY conf/nginx.conf /etc/nginx/
 EXPOSE 80
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
