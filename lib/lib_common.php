@@ -1,4 +1,6 @@
 <?php
+namespace Pixmicat;
+
 /**
  * Pixmicat! Common Library
  *
@@ -8,7 +10,7 @@
  * @version $Id$
  * @date $Date$
  */
-
+ 
 /* 輸出表頭 */
 function head(&$dat,$resno=0){
 	$PTE = PMCLibrary::getPTEInstance();
@@ -51,14 +53,14 @@ function form(&$dat, $resno, $iscollapse=true, $retURL=PHP_SELF, $name='', $mail
 	$pte_vals += array('{$MAX_FILE_SIZE}' => MAX_KB * 1024,
 		'{$RESTO}' => $resno ? '<input type="hidden" name="resto" value="'.$resno.'" />' : '',
 		'{$FORM_NAME_TEXT}' => _T('form_name'),
-		'{$FORM_NAME_FIELD}' => '<input class="hide" type="text" name="name" value="spammer" /><input type="text" name="'.FT_NAME.'" id="fname" size="28" value="'.$name.'" />',
+		'{$FORM_NAME_FIELD}' => '<input class="hide" type="text" name="name" value="spammer" /><input maxlength="'.INPUT_MAX.'" type="text" name="'.FT_NAME.'" id="fname" size="28" value="'.$name.'" />',
 		'{$FORM_EMAIL_TEXT}' => _T('form_email'),
-		'{$FORM_EMAIL_FIELD}' => '<input type="text" name="'.FT_EMAIL.'" id="femail" size="28" value="'.$mail.'" /><input type="text" class="hide" name="email" value="foo@foo.bar" />',
+		'{$FORM_EMAIL_FIELD}' => '<input maxlength="'.INPUT_MAX.'" type="text" name="'.FT_EMAIL.'" id="femail" size="28" value="'.$mail.'" /><input type="text" class="hide" name="email" value="foo@foo.bar" />',
 		'{$FORM_TOPIC_TEXT}' => _T('form_topic'),
-		'{$FORM_TOPIC_FIELD}' => '<input class="hide" value="DO NOT FIX THIS" type="text" name="sub" /><input type="text" name="'.FT_SUBJECT.'" id="fsub" size="28" value="'.$sub.'" />',
+		'{$FORM_TOPIC_FIELD}' => '<input class="hide" value="DO NOT FIX THIS" type="text" name="sub" /><input maxlength="'.INPUT_MAX.'"  type="text" name="'.FT_SUBJECT.'" id="fsub" size="28" value="'.$sub.'" />',
 		'{$FORM_SUBMIT}' => '<input type="submit" name="sendbtn" value="'._T('form_submit_btn').'" />',
 		'{$FORM_COMMENT_TEXT}' => _T('form_comment'),
-		'{$FORM_COMMENT_FIELD}' => '<textarea name="'.FT_COMMENT.'" id="fcom" cols="48" rows="4" style="width: 400px; height: 80px;">'.$com.'</textarea><textarea name="com" class="hide" cols="48" rows="4">EID OG SMAPS</textarea>',
+		'{$FORM_COMMENT_FIELD}' => '<textarea maxlength="'.COMM_MAX.'" name="'.FT_COMMENT.'" id="fcom" cols="48" rows="4" style="width: 400px; height: 80px;">'.$com.'</textarea><textarea name="com" class="hide" cols="48" rows="4">EID OG SMAPS</textarea>',
 		'{$FORM_DELETE_PASSWORD_FIELD}' => '<input type="password" name="pwd" size="8" maxlength="8" value="" />',
 		'{$FORM_DELETE_PASSWORD_TEXT}' => _T('form_delete_password'),
 		'{$FORM_DELETE_PASSWORD_NOTICE}' => _T('form_delete_password_notice'),
@@ -102,12 +104,13 @@ function foot(&$dat){
 }
 
 /* 網址自動連結 */
-function auto_link_callback($matches){
-	return (strtolower($matches[3]) == "</a>") ? $matches[0] : preg_replace('/(https?|ftp|news)(:\/\/[\w\+\$\;\?\.\{\}%,!#~*\/:@&=_-]+)/u', '<a href="$1$2" target="_blank" rel="nofollow noreferrer">$1$2</a>', $matches[0]);
-}
 function auto_link($proto){
 	$proto = preg_replace('|<br\s*/?>|',"\n",$proto);
-	$proto = preg_replace_callback('/(>|^)([^<]+?)(<.*?>|$)/m','auto_link_callback',$proto);
+        $proto = preg_replace_callback('/(>|^)([^<]+?)(<.*?>|$)/m', function($matches) {
+            return (strtolower($matches[3]) == "</a>")
+                ? $matches[0]
+                : preg_replace('/(https?|ftp|news)(:\/\/[\w\+\$\;\?\.\{\}%,!#~*\/:@&=_-]+)/u', '<a href="$1$2" target="_blank" rel="nofollow noreferrer">$1$2</a>', $matches[0]);
+        }, $proto);
 	return str_replace("\n",'<br />',$proto);
 }
 
@@ -118,7 +121,7 @@ function quoteLight($comment){
 
 /* 取得完整的網址 */
 function fullURL(){
-	return 'http://'.$_SERVER['HTTP_HOST'].substr($_SERVER['PHP_SELF'], 0, strpos($_SERVER['PHP_SELF'], PHP_SELF));
+	return '//'.$_SERVER['HTTP_HOST'].substr($_SERVER['PHP_SELF'], 0, strpos($_SERVER['PHP_SELF'], PHP_SELF));
 }
 
 /* 反櫻花字 */
@@ -308,13 +311,15 @@ function getREMOTE_ADDR(){
         return $ipProxy;
     }
 
-    return filter_input(INPUT_SERVER, 'REMOTE_ADDR');
+    return $_SERVER['REMOTE_ADDR'];
 }
 
 /**
  * 取得 (Transparent) Proxy 提供之 IP 參數
  */
 function getRemoteAddrThroughProxy() {
+    global $PROXYHEADERlist;
+
     if (!defined('TRUST_HTTP_X_FORWARDED_FOR') || !TRUST_HTTP_X_FORWARDED_FOR) {
         return '';
     }
@@ -343,8 +348,8 @@ function getRemoteAddrThroughProxy() {
  * @since 8th.Release
  */
 function getRemoteAddrOpenShift() {
-    if (filter_has_var(INPUT_ENV, 'OPENSHIFT_REPO_DIR')) {
-        return filter_input(INPUT_SERVER, 'HTTP_X_FORWARDED_FOR');
+    if (isset($_ENV['OPENSHIFT_REPO_DIR'])) {
+        return $_SERVER['HTTP_X_FORWARDED_FOR'];
     }
     return '';
 }
@@ -355,22 +360,26 @@ function getRemoteAddrOpenShift() {
 */
 
 function getRemoteAddrCloudFlare() {
-    $addr = filter_input(INPUT_SERVER, 'REMOTE_ADDR');
+    $addr = $_SERVER['REMOTE_ADDR'];
     $cloudflare_v4 = array('199.27.128.0/21', '173.245.48.0/20', '103.21.244.0/22', '103.22.200.0/22', '103.31.4.0/22', '141.101.64.0/18', '108.162.192.0/18', '190.93.240.0/20', '188.114.96.0/20', '197.234.240.0/22', '198.41.128.0/17', '162.158.0.0/15', '104.16.0.0/12');
     $cloudflare_v6 = array('2400:cb00::/32', '2606:4700::/32', '2803:f800::/32', '2405:b500::/32', '2405:8100::/32');
 
     if(filter_var($addr, FILTER_VALIDATE_IP,FILTER_FLAG_IPV4)) { //v4 address
         foreach ($cloudflare_v4 as &$cidr) {
             if(matchCIDR($addr, $cidr)) {
-                return filter_input(INPUT_SERVER, 'HTTP_CF_CONNECTING_IP');
+                return $_SERVER['HTTP_CF_CONNECTING_IP'];
             }
         }
     } else { // v6 address
         foreach ($cloudflare_v6 as &$cidr) {
             if(matchCIDRv6($addr, $cidr)) {
-                return filter_input(INPUT_SERVER, 'HTTP_CF_CONNECTING_IP');
+                return $_SERVER['HTTP_CF_CONNECTING_IP'];
             }
         }
     }
     return '';
+}
+
+function strlenUnicode($str) {
+    return mb_strlen($str, 'UTF-8');
 }

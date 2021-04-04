@@ -2,7 +2,7 @@
 /*
 Pixmicat! : 圖咪貓貼圖版程式
 http://pixmicat.openfoundry.org/
-版權所有 © 2005-2014 Pixmicat! Development Team
+版權所有 © 2005-2015 Pixmicat! Development Team
 
 版權聲明：
 此程式是基於レッツPHP!<http://php.s3.to/>的gazou.php、
@@ -21,7 +21,7 @@ http://pixmicat.openfoundry.org/
 */
 /*---- Part 1：程式基本設定 ----*/
 // 伺服器常態設定
-define("DEBUG", false); // 是否產生詳細 DEBUG 訊息
+if(!defined('DEBUG')) define("DEBUG", false); // 是否產生詳細 DEBUG 訊息
 define("ROOTPATH", dirname(__FILE__).DIRECTORY_SEPARATOR); // 主程式根目錄
 define("STORAGE_PATH", ROOTPATH); // 圖檔、快取儲存目錄 (需具有讀寫權限 777)
 define("TIME_ZONE", '+8'); // 時區設定 (GMT時區，參照 http://wwp.greenwichmeantime.com/ )
@@ -30,7 +30,7 @@ define("HTTP_UPLOAD_DIFF", 50); // HTTP上傳所有位元組與實際位元組�
 ini_set("memory_limit", '128M'); // PHP運行的最大記憶體使用量 (php內定128M/無限:-1)
 
 // FileIO設定
-define("FILEIO_BACKEND", 'local'); // FileIO後端指定 (local, normal, ftp)
+define("FILEIO_BACKEND", 'normal'); // FileIO後端指定 (local, normal, ftp)
 define("FILEIO_INDEXLOG", 'fileioindex.dat'); // FileIO索引記錄檔 (儲存在本機端)
 define("FILEIO_PARAMETER", ''); // FileIO參數 (本機端儲存)
 //define("FILEIO_PARAMETER", serialize(array('ftp.example.com', 21, 'demo', 'demo', 'PASV', '/pwd/', 'http://www.example.com/~demo/pwd/', true))); // FileIO參數 (FTP)
@@ -38,7 +38,6 @@ define("FILEIO_PARAMETER", ''); // FileIO參數 (本機端儲存)
 //define("FILEIO_PARAMETER", serialize(array('http://www.example.com/~demo/satellite.cgi', true, '12345678', 'http://www.example.com/~demo/src/', true))); // FileIO參數 (Satellite)
 
 // PIO資料來源設定
-//define("CONNECTION_STRING", 'log://'.STORAGE_PATH.'img.log:'.STORAGE_PATH.'tree.log/'); // PIO 連線字串 (Log)
 //define("CONNECTION_STRING", 'mysql://pixmicat:pass@localhost/test/imglog/'); // PIO 連線字串 (MySQL)
 define("CONNECTION_STRING", 'sqlite3://'.STORAGE_PATH.'pixmicat.db3/imglog/'); // PIO 連線字串 (PDO SQLite)
 //define("CONNECTION_STRING", 'sqlite://'.STORAGE_PATH.'pixmicat.db/imglog/'); // PIO 連線字串 (SQLite 2)
@@ -99,11 +98,28 @@ $DNSBLWHlist = array(); // DNSBL白名單 (請輸入IP位置)
 $BAD_STRING = array("dummy_string","dummy_string2"); // 限制出現之文字
 $BAD_FILEMD5 = array("dummy","dummy2"); // 限制上傳附加圖檔之MD5檢查碼
 
+/* ---- WEBM ----
+ * (僅支援Linux)
+ * 
+ * 安裝方法
+ * 1. Debian/Ubuntu
+ *      apt-get install libav-tools
+ * 2. CentOS/Fedora
+ *      yum install ffmpeg
+ */
+define('USE_WEBM', FALSE);
+$FFMPEG_CONFIGS = array(
+    'ffmpeg.binaries'  => '/usr/bin/avconv', // ffmpeg/avconv執行檔位置
+    'ffprobe.binaries' => '/usr/bin/avprobe', // ffprobe/avprobe執行檔位置
+    'timeout'          => 5000, // ms
+    'ffmpeg.threads'   => 1,
+);
+
 // 附加圖檔限制
 define("MAX_KB", 2000); // 附加圖檔上傳容量限制KB (php內定為最高2MB)
 define("STORAGE_LIMIT", 1); // 附加圖檔總容量限制功能 (啟動：1 關閉：0)
 define("STORAGE_MAX", 30000); // 附加圖檔總容量限制上限大小 (單位：KB)
-define("ALLOW_UPLOAD_EXT", 'GIF|JPG|JPEG|PNG|BMP|SWF'); // 接受之附加圖檔副檔名 (送出前表單檢查用，用 | 分隔)
+define("ALLOW_UPLOAD_EXT", 'GIF|JPG|JPEG|PNG|BMP|SWF' . (USE_WEBM?'|WEBM':'')); // 接受之附加圖檔副檔名 (送出前表單檢查用，用 | 分隔)
 
 // 連續投稿時間限制
 define("RENZOKU", 60); // 連續投稿間隔秒數
@@ -130,7 +146,8 @@ define("RE_DEF", 10); // 一篇討論串最多顯示之回應筆數 (超過則�
 define("RE_PAGE_DEF", 30); // 回應模式一頁顯示幾筆回應內容 (分頁用，全部顯示：0)
 define("MAX_RES", 30); // 回應筆數超過多少則不自動推文 (關閉：0)
 define("MAX_AGE_TIME", 0); // 討論串可接受推文的時間範圍 (單位：小時，討論串存在超過此時間則回應皆不再自動推文 關閉：0)
-define("COMM_MAX", 2000); // 內文接受Bytes數 (注意：中文字為2Bytes)
+define("COMM_MAX", 2000); // 內文接受字數 (UTF-8)
+define("INPUT_MAX", 100); // 除了內文外其他欄位的字數上限
 define("BR_CHECK", 0); // 文字換行行數上限 (不限：0)
 define("STATIC_HTML_UNTIL", 10); // 更新文章時自動生成的靜態網頁至第幾頁止 (全部生成：-1 僅入口頁：0)
 define("GZIP_COMPRESS_LEVEL", 3); // PHP動態輸出頁面使用Gzip壓縮層級 (關閉：0 啟動：1～9，推薦值：3)
@@ -149,4 +166,3 @@ define("FT_NAME", 'bvUFbdrIC'); // 名稱欄位
 define("FT_EMAIL", 'ObHGyhdTR'); // E-mail欄位
 define("FT_SUBJECT", 'SJBgiFbhj'); // 標題欄位
 define("FT_COMMENT", 'pOBvrtyJK'); // 內文欄位
-?>

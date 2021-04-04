@@ -1,0 +1,30 @@
+language: php
+
+php:
+  - 5.3
+  - 5.4
+  - 5.5
+  - 5.6
+  - hhvm
+
+before_install:
+  - curl -sS https://getcomposer.org/installer | php
+  - sudo apt-get update
+  - sudo apt-get install -y libav-tools
+
+install:
+  - php composer.phar install --prefer-dist --no-interaction --no-progress
+  - php composer.phar require 'php-ffmpeg/php-ffmpeg:0.6.0' --no-interaction --no-progress
+
+before_script:
+  - mkdir -p shippable/testresults
+  - mkdir -p shippable/codecoverage  
+  
+script:
+  - php --version
+  - vendor/bin/phpunit -c TestCase/phpunit.xml -d date.timezone=UTC --log-junit shippable/testresults/junit.xml --coverage-xml shippable/codecoverage
+  
+notifications:
+  email:
+    on_success: never
+    on_failure: always

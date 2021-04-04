@@ -1,4 +1,4 @@
-Pixmicat! Imageboard System
+Pixmicat! Imageboard System [![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/) [![Build Status](https://drone.io/github.com/scribetw/pixmicat/status.png)](https://drone.io/github.com/scribetw/pixmicat/latest)
 ========
 
 What is this?
@@ -14,11 +14,10 @@ Artistic License 2.0
 Requirements
 ------------
 
-- PHP 5.2.0 or above (PHP 4 is not supported)
+- PHP 5.3.0 or above (PHP 4 is not supported)
 - GD module
 
 Resources
 ---------
 
-- Google Code: http://code.google.com/p/pixmicat/
 - Project site: http://pixmicat.openfoundry.org/ (Chinese zh-TW)
